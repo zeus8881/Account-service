@@ -1,0 +1,14 @@
+package com.example.myspringproject.dto;
+
+import jakarta.validation.constraints.NotNull;
+
+public record PaymentRequestDTO(
+        @NotNull
+        String employee,
+
+        @NotNull
+        String period,
+
+        Long salary
+) {
+}
