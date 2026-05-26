@@ -1,7 +1,6 @@
 package com.example.myspringproject.service;
 
 import com.example.myspringproject.dto.*;
-import com.example.myspringproject.entity.Operation;
 import com.example.myspringproject.entity.Role;
 import com.example.myspringproject.entity.RoleName;
 import com.example.myspringproject.entity.User;
@@ -51,19 +50,19 @@ public class UserService {
         this.securityEventService = securityEventService;
     }
 
-    public ResponseDTO signUp(RequestDTO requestDTO) {
-        if (!requestDTO.email().endsWith("@acme.com")) {
+    public SignupResponseDTO signUp(SignupRequestDTO signupRequestDTO) {
+        if (!signupRequestDTO.email().endsWith("@acme.com")) {
             throw new IllegalArgumentException("Invalid employee");
         }
 
-        if (userRepository.findByEmail(requestDTO.email().toLowerCase()).isPresent()) {
+        if (userRepository.findByEmail(signupRequestDTO.email().toLowerCase()).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
         } else {
 
-            if (requestDTO.password().length() < 12) {
+            if (signupRequestDTO.password().length() < 12) {
                 throw new IllegalArgumentException("Password must be at least 12 characters long");
 
-            } else if (badPasswords.contains(requestDTO.password())) {
+            } else if (badPasswords.contains(signupRequestDTO.password())) {
                 throw new IllegalArgumentException("The password is in the hacker's database!");
 
             }
@@ -76,10 +75,10 @@ public class UserService {
             }
 
             User user = User.builder()
-                    .name(requestDTO.name())
-                    .lastName(requestDTO.lastName())
-                    .email(requestDTO.email().toLowerCase())
-                    .password(passwordEncoder.encode(requestDTO.password()))
+                    .name(signupRequestDTO.name())
+                    .lastName(signupRequestDTO.lastName())
+                    .email(signupRequestDTO.email().toLowerCase())
+                    .password(passwordEncoder.encode(signupRequestDTO.password()))
                     .build();
 
             user.setRoles(new HashSet<>());
@@ -96,7 +95,7 @@ public class UserService {
                         "/api/auth/signup"
                 );
 
-                return new ResponseDTO(savedUser.getId(),
+                return new SignupResponseDTO(savedUser.getId(),
                         savedUser.getName(),
                         savedUser.getLastName(),
                         savedUser.getEmail()
@@ -114,7 +113,7 @@ public class UserService {
                         "/api/auth/signup"
                 );
 
-                return new ResponseDTO(savedUser.getId(),
+                return new SignupResponseDTO(savedUser.getId(),
                         savedUser.getName(),
                         savedUser.getLastName(),
                         savedUser.getEmail().toLowerCase());
@@ -122,18 +121,18 @@ public class UserService {
         }
     }
 
-    public ResponseDTO getApiPayment(Principal principal) {
+    public SignupResponseDTO getApiPayment(Principal principal) {
         String email = principal.getName();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
 
-        return new ResponseDTO(user.getId(),
+        return new SignupResponseDTO(user.getId(),
                 user.getName(),
                 user.getLastName(),
                 user.getEmail()
                         .toLowerCase());
     }
 
-    public ChangePasswordResponseDTO changePswd(Principal principal, ChangePasswordRequestDTO passwordRequestDTO) {
+    public ChangePasswordResponse changePswd(Principal principal, ChangePasswordRequest passwordRequestDTO) {
         String email = principal.getName();
 
         User user = userRepository.findByEmail(email).orElseThrow(() ->
@@ -161,16 +160,16 @@ public class UserService {
 
             User save = userRepository.save(user);
 
-            return new ChangePasswordResponseDTO(save.getEmail(),
+            return new ChangePasswordResponse(save.getEmail(),
                     "The password has been updated successfully");
         }
     }
 
-    public List<UserGetResponseDTO> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
                 .sorted(Comparator.comparing(User::getId))
                 .map(user ->
-                        new UserGetResponseDTO(user.getId(),
+                        new UserResponse(user.getId(),
                                 user.getName(),
                                 user.getLastName(),
                                 user.getEmail(),
@@ -183,7 +182,7 @@ public class UserService {
                 .toList();
     }
 
-    public DeleteUserEmailResponseDTO deleteUser(Principal principal, String email) {
+    public UserDeleteResponse deleteUser(Principal principal, String email) {
         User deletedUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found!"));
 
@@ -202,15 +201,15 @@ public class UserService {
                 "/api/admin/user"
         );
 
-        return new DeleteUserEmailResponseDTO(deletedUser.getEmail(),
+        return new UserDeleteResponse(deletedUser.getEmail(),
                 "Deleted successfully!");
     }
 
-    public UserGetResponseDTO changeRole(UserPutRequestDTO userPutRequestDTO, Principal principal) {
-        User user = userRepository.findByEmail(userPutRequestDTO.user())
+    public UserResponse changeRole(UserRequest userRequest, Principal principal) {
+        User user = userRepository.findByEmail(userRequest.user())
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        Role targetRole = roleRepository.findByName(RoleName.valueOf(userPutRequestDTO.role().toUpperCase()));
+        Role targetRole = roleRepository.findByName(RoleName.valueOf(userRequest.role().toUpperCase()));
 
 
         if (targetRole == null) {
@@ -219,7 +218,7 @@ public class UserService {
 
         Set<Role> roles = new HashSet<>(user.getRoles());
 
-        if (userPutRequestDTO.operation().equals("GRANT")) {
+        if (userRequest.operation().equals("GRANT")) {
 
             if (targetRole.getName().equals(RoleName.ROLE_ADMINISTRATOR)) {
                 if (!roles.isEmpty()) {
@@ -243,7 +242,7 @@ public class UserService {
             );
         }
 
-        if (userPutRequestDTO.operation().equals("REMOVE")) {
+        if (userRequest.operation().equals("REMOVE")) {
 
             if (user.getRoles().stream().noneMatch(role -> role.getName().equals(targetRole.getName()))) {
                 throw new IllegalArgumentException("User does not have this role");
@@ -270,7 +269,7 @@ public class UserService {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return new UserGetResponseDTO(user.getId(),
+        return new UserResponse(user.getId(),
                 user.getName(),
                 user.getLastName(),
                 user.getEmail(),
@@ -280,18 +279,18 @@ public class UserService {
                         .toList());
     }
 
-    public UserAdminAccessResponseDTO userAdminAccessUserDTO(
-            UserAdminAccessRequestUserDTO userAdminAccessRequestUserDTO,
+    public UserAccessResponse userAdminAccessUserDTO(
+            UserAccessRequest userAccessRequest,
             Principal principal) {
 
-        User user = userRepository.findByEmail(userAdminAccessRequestUserDTO.user().toLowerCase())
+        User user = userRepository.findByEmail(userAccessRequest.user().toLowerCase())
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
         if (user.getRoles().stream().anyMatch(role -> role.getName().equals(RoleName.ROLE_ADMINISTRATOR))) {
             throw new IllegalArgumentException("Can't lock the ADMINISTRATOR!");
         }
 
-        if (userAdminAccessRequestUserDTO.operation().equals(LOCK)) {
+        if (userAccessRequest.operation().equals(LOCK)) {
             user.setLocked(true);
             user.setFailedAttempts(0);
             userRepository.save(user);
@@ -304,7 +303,7 @@ public class UserService {
                     "/api/admin/user/access"
             );
 
-        } else if (userAdminAccessRequestUserDTO.operation().equals(UNLOCK)) {
+        } else if (userAccessRequest.operation().equals(UNLOCK)) {
             user.setLocked(false);
             user.setFailedAttempts(0);
             userRepository.save(user);
@@ -320,8 +319,8 @@ public class UserService {
         } else {
             throw new IllegalArgumentException("Invalid operation");
         }
-        return new UserAdminAccessResponseDTO(
-                "User " + user.getEmail() + " " + userAdminAccessRequestUserDTO.operation().name() + "!"
+        return new UserAccessResponse(
+                "User " + user.getEmail() + " " + userAccessRequest.operation().name() + "!"
         );
     }
 }

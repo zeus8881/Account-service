@@ -1,6 +1,7 @@
 package com.example.myspringproject.dto;
 
-public record UserAdminAccessResponseDTO(
+public record UserDeleteResponse(
+        String user,
         String status
 ) {
 }

@@ -2,9 +2,7 @@ package com.example.myspringproject.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.util.List;
-
-public record UserPutRequestDTO(
+public record UserRequest(
         @NotNull
         String user,
         String role,

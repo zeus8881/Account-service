@@ -1,9 +1,9 @@
 package com.example.myspringproject.service;
 
 
-import com.example.myspringproject.dto.PaymentRequestDTO;
-import com.example.myspringproject.dto.PaymentStatusResponseDTO;
-import com.example.myspringproject.dto.PaymentsResponseEmplDTO;
+import com.example.myspringproject.dto.PaymentRequest;
+import com.example.myspringproject.dto.PaymentResponse;
+import com.example.myspringproject.dto.PaymentsResponseEmployee;
 import com.example.myspringproject.entity.Payment;
 import com.example.myspringproject.entity.User;
 import com.example.myspringproject.repository.PaymentRepository;
@@ -33,15 +33,15 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentStatusResponseDTO loadPayments(List<PaymentRequestDTO> paymentRequestDTO) {
-        for (int i = 0; i < paymentRequestDTO.size(); i++) {
-            User user = userRepository.findByEmail(paymentRequestDTO.get(i).employee().toLowerCase()).orElseThrow(() ->
+    public PaymentResponse loadPayments(List<PaymentRequest> paymentRequest) {
+        for (int i = 0; i < paymentRequest.size(); i++) {
+            User user = userRepository.findByEmail(paymentRequest.get(i).employee().toLowerCase()).orElseThrow(() ->
                     new IllegalArgumentException("User not found."));
 
-            if (paymentRequestDTO.get(i).salary() < 0) {
+            if (paymentRequest.get(i).salary() < 0) {
                 throw new IllegalArgumentException("Salary must be greater than 0");
             } else {
-                LocalDate date = parsePeriod(paymentRequestDTO.get(i).period());
+                LocalDate date = parsePeriod(paymentRequest.get(i).period());
 
                 if (paymentRepository.findByUserAndPeriod(user, date).isPresent()) {
                     throw new IllegalArgumentException("Payment already exists for this user and period");
@@ -49,32 +49,32 @@ public class PaymentService {
                     Payment payment = Payment.builder()
                             .user(user)
                             .period(date)
-                            .salary(paymentRequestDTO.get(i).salary())
+                            .salary(paymentRequest.get(i).salary())
                             .build();
                     paymentRepository.save(payment);
                 }
             }
         }
 
-        return new PaymentStatusResponseDTO("Added successfully!");
+        return new PaymentResponse("Added successfully!");
     }
 
-    public PaymentStatusResponseDTO updatePayments(PaymentRequestDTO paymentRequestDTO) {
-        User user = userRepository.findByEmail(paymentRequestDTO.employee().toLowerCase())
+    public PaymentResponse updatePayments(PaymentRequest paymentRequest) {
+        User user = userRepository.findByEmail(paymentRequest.employee().toLowerCase())
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        LocalDate date = parsePeriod(paymentRequestDTO.period());
-        if (paymentRequestDTO.salary() < 0) {
+        LocalDate date = parsePeriod(paymentRequest.period());
+        if (paymentRequest.salary() < 0) {
             throw new IllegalArgumentException("Salary must be greater than 0");
         } else {
             Payment payment = paymentRepository.findByUserAndPeriod(user, date)
                     .orElseGet(Payment::new);
             payment.setUser(user);
             payment.setPeriod(date);
-            payment.setSalary(paymentRequestDTO.salary());
+            payment.setSalary(paymentRequest.salary());
             paymentRepository.save(payment);
         }
-        return new PaymentStatusResponseDTO("Updated successfully!");
+        return new PaymentResponse("Updated successfully!");
     }
 
     public ResponseEntity<?> getDataOfSalaryForUser(Principal principal, String period) {
@@ -86,7 +86,7 @@ public class PaymentService {
             Payment payment = paymentRepository.findByUserAndPeriod(user, parsedPeriod)
                     .orElseThrow(() -> new IllegalArgumentException("Payment not found for the specified period."));
 
-            return ResponseEntity.ok(new PaymentsResponseEmplDTO(
+            return ResponseEntity.ok(new PaymentsResponseEmployee(
                     payment.getUser().getName(),
                     payment.getUser().getLastName(),
                     formatPeriod(payment.getPeriod()),
@@ -94,7 +94,7 @@ public class PaymentService {
         } else {
             return ResponseEntity.ok(paymentRepository.findPaymentByUser(user).stream()
                     .sorted(Comparator.comparing(Payment::getPeriod).reversed())
-                    .map(p -> new PaymentsResponseEmplDTO(
+                    .map(p -> new PaymentsResponseEmployee(
                             p.getUser().getName(),
                             p.getUser().getLastName(),
                             formatPeriod(p.getPeriod()),

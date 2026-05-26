@@ -1,7 +1,6 @@
 package com.example.myspringproject.dto;
 
-public record DeleteUserEmailResponseDTO(
-        String user,
+public record PaymentResponse(
         String status
 ) {
 }

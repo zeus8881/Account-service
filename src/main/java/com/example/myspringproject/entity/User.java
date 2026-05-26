@@ -46,12 +46,16 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Payment> payments;
 
+    @Column(nullable = false)
+    private boolean isLocked = false;
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role", joinColumns =
     @JoinColumn(name = "user_id"), inverseJoinColumns =
     @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 
-    boolean isLocked;
-    int failedAttempts;
+    @Column
+    private Integer failedAttempts;
 }

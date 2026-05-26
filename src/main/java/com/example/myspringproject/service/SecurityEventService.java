@@ -1,16 +1,12 @@
 package com.example.myspringproject.service;
 
-import com.example.myspringproject.dto.SecurityEventsResponseDTO;
+import com.example.myspringproject.dto.SecurityEventResponse;
 import com.example.myspringproject.entity.ActionName;
 import com.example.myspringproject.entity.SecurityEvent;
-import com.example.myspringproject.entity.User;
 import com.example.myspringproject.repository.SecurityEventRepository;
-import com.example.myspringproject.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -18,12 +14,10 @@ import java.util.List;
 @Service
 public class SecurityEventService {
     private final SecurityEventRepository securityEventRepository;
-    private final UserRepository userRepository;
 
     @Autowired
-    public SecurityEventService(SecurityEventRepository securityEventRepository, UserRepository userRepository) {
+    public SecurityEventService(SecurityEventRepository securityEventRepository) {
         this.securityEventRepository = securityEventRepository;
-        this.userRepository = userRepository;
     }
 
     public void eventSecurity(LocalDateTime date, ActionName action, String subject, String object, String path) {
@@ -37,11 +31,18 @@ public class SecurityEventService {
         securityEventRepository.save(securityEvent);
     }
 
-    public List<SecurityEventsResponseDTO> getAllEvents(Principal principal) {
-        String email = principal.getName();
-        User user = userRepository.findByEmail(email).orElseThrow(() ->
-                new IllegalArgumentException("User not found."));
+    public List<SecurityEventResponse> getAllEvents() {
         List<SecurityEvent> securityEventLIst = securityEventRepository.findAll();
-        return List.of();
+
+        return securityEventLIst.stream()
+                .sorted(Comparator.comparing(SecurityEvent::getId))
+                .map(securityEvent -> new SecurityEventResponse(
+                        securityEvent.getDate(),
+                        securityEvent.getAction().name(),
+                        securityEvent.getSubject(),
+                        securityEvent.getObject(),
+                        securityEvent.getPath()
+                ))
+                .toList();
     }
 }

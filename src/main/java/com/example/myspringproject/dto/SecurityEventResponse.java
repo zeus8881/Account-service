@@ -2,7 +2,7 @@ package com.example.myspringproject.dto;
 
 import java.time.LocalDateTime;
 
-public record SecurityEventsResponseDTO(
+public record SecurityEventResponse(
         LocalDateTime date,
         String action,
         String subject,

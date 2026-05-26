@@ -3,7 +3,7 @@ package com.example.myspringproject.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record RequestDTO(
+public record SignupRequestDTO(
         @NotNull(message = "Name must be not null")
         @NotBlank
         String name,

@@ -1,7 +1,7 @@
 package com.example.myspringproject.controller;
 
-import com.example.myspringproject.dto.PaymentRequestDTO;
-import com.example.myspringproject.dto.PaymentStatusResponseDTO;
+import com.example.myspringproject.dto.PaymentRequest;
+import com.example.myspringproject.dto.PaymentResponse;
 import com.example.myspringproject.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,14 +22,14 @@ public class PaymentController {
     }
 
     @PostMapping("/acct/payments")
-    @PreAuthorize("hasAnyRole('ACCOUNTANT', 'USER')")
-    public ResponseEntity<PaymentStatusResponseDTO> payment(@RequestBody @Validated List<PaymentRequestDTO> paymentRequestDTO) {
-        return ResponseEntity.ok(paymentService.loadPayments(paymentRequestDTO));
+    @PreAuthorize("hasRole('ACCOUNTANT')")
+    public ResponseEntity<PaymentResponse> payment(@RequestBody @Validated List<PaymentRequest> paymentRequest) {
+        return ResponseEntity.ok(paymentService.loadPayments(paymentRequest));
     }
 
     @PutMapping("/acct/payments")
-    @PreAuthorize("hasAnyRole('ACCOUNTANT', 'USER')")
-    public ResponseEntity<PaymentStatusResponseDTO> updatePaymentsForUser(@RequestBody @Validated PaymentRequestDTO paymentRequestDTO) {
-        return ResponseEntity.ok(paymentService.updatePayments(paymentRequestDTO));
+    @PreAuthorize("hasRole('ACCOUNTANT')")
+    public ResponseEntity<PaymentResponse> updatePaymentsForUser(@RequestBody @Validated PaymentRequest paymentRequest) {
+        return ResponseEntity.ok(paymentService.updatePayments(paymentRequest));
     }
 }

@@ -1,6 +1,6 @@
 package com.example.myspringproject.dto;
 
-public record ResponseDTO(
+public record SignupResponseDTO(
         Long id,
         String name,
         String lastName,

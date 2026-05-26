@@ -1,6 +1,6 @@
 package com.example.myspringproject.dto;
 
-public record PaymentStatusResponseDTO(
+public record UserAccessResponse(
         String status
 ) {
 }

@@ -2,7 +2,7 @@ package com.example.myspringproject.dto;
 
 import java.util.List;
 
-public record UserGetResponseDTO(
+public record UserResponse(
         Long id,
         String name,
         String lastName,
