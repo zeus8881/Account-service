@@ -23,4 +23,10 @@ logging:
       postgresql: DEBUG
 
 server:
+  ssl:
+    enabled: true
+    key-store-type: PKCS12
+    key-store: classpath:keystore/keystore.p12
+    key-store-password: service
+    key-alias: accountant_service
   port: 8088
