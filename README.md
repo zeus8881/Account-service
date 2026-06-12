@@ -1,10 +1,13 @@
 # 💰 Account Service
 
-[![Spring Boot](https://shields.io)](https://spring.io)
-[![Java](https://shields.io)](https://oracle.com)
-[![PostgreSQL](https://shields.io)](https://postgresql.org)
-[![SonarQube](https://shields.io)](https://sonarqube.org)
-[![Security](https://shields.io)](https://spring.io)
+# 💰 Account Service
+
+![Spring Boot](https://shields.io)
+![Java](https://shields.io)
+![PostgreSQL](https://shields.io)
+![SonarQube](https://shields.io)
+![Security](https://shields.io)
+
 
 Комплексна бекенд-система корпоративного рівня для управління фінансами, рахунками компанії, співробітниками та безпекою організації. Проєкт реалізовано в рамках сертифікації на платформі **JetBrains Academy / Hyperskill**. Фокус проєкту — побудова захищеного REST API з розподілом прав доступу (RBAC), логуванням операцій та захистом від кібератак.
 
