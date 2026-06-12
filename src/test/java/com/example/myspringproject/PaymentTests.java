@@ -2,10 +2,8 @@ package com.example.myspringproject;
 
 import com.example.myspringproject.dto.PaymentRequest;
 import com.example.myspringproject.dto.PaymentResponse;
-import com.example.myspringproject.entity.Payment;
 import com.example.myspringproject.service.PaymentService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,8 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 
