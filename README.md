@@ -1,7 +1,5 @@
 # 💰 Account Service
 
-# 💰 Account Service
-
 ![Spring Boot](https://shields.io)
 ![Java](https://shields.io)
 ![PostgreSQL](https://shields.io)
